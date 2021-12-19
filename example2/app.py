@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from flask import Flask, request, render_template, send_from_directory
 
-app = Flask(__name__,)  # Need this because Flask sets up some paths behind the scenes
+app = Flask(__name__, static_folder= 'static')  # Need this because Flask sets up some paths behind the scenes
 # app = Flask(__name__, static_folder="images")
 
 
@@ -16,12 +16,15 @@ classes = ['Angry','Disgust','Fear','Happy','Neutral','Sad','Surprise'] # this i
 def index():
     return render_template("index.html")
 
+@app.route("/modelinfo")
 def modelInfo():
     return render_template("modelinfo.html")
+
+@app.route("/model")
 def model():
     return render_template("model.html")
 
-@app.route("/upload", methods=["POST"])
+@app.route("/model", methods=["POST"])
 def upload():
     target = os.path.join(APP_ROOT, 'test')
     # target = os.path.join(APP_ROOT, 'static/')
@@ -55,9 +58,9 @@ def upload():
         from tensorflow.keras.models import load_model
         import matplotlib.pyplot as plt
         
-        new_model = load_model('/Users/riley/Documents/Python Documents/ArtificialIntelligence/SemesterProject/Emotion_CNN.h5')
+        new_model = load_model('/home/ubuntu/backbash/Emotion_CNN.h5')
         # new_model.summary()
-        img = image.load_img('/Users/riley/Documents/Python Documents/ArtificialIntelligence/SemesterProject/test/'+img,target_size=(48,48))
+        img = image.load_img('test/'+img, target_size=(48,48), color_mode="grayscale")
         img = np.array(img)
         img = np.expand_dims(img,axis = 0) #makes image shape (1,48,48)
         img = img.reshape(-1,48,48,1)
@@ -77,12 +80,12 @@ def upload():
         # prediction = classes[i]
 
     # return send_from_directory("images", filename, as_attachment=True)
-    return render_template("template.html",image_name=img, text=prediction)
+    return render_template("prediction.html",image_name=img, text=prediction)
 
-@app.route('/upload/<filename>')
-def send_image(filename):
-    return send_from_directory("images", filename)
+@app.route('/pediction/<img>')
+def send_image(img):
+    return send_from_directory("/test",img)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='0.0.0.0',port=8080)
 
